@@ -3,17 +3,30 @@ import React, { useState } from 'react';
 function App() {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState({ name: '', description: '' });
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const addTask = () => {
     if (task.name.trim() === '') return; // Input validation
-    setTasks([...tasks, task]);
+    if (editingIndex === null) {
+      setTasks([...tasks, task]);
+    } else {
+      const updatedTasks = [...tasks];
+      updatedTasks[editingIndex] = task;
+      setTasks(updatedTasks);
+      setEditingIndex(null);
+    }
     setTask({ name: '', description: '' });
   };
 
-  const editTask = (index, updatedTask) => {
-    const updatedTasks = [...tasks];
-    updatedTasks[index] = updatedTask;
-    setTasks(updatedTasks);
+  const editTask = (index) => {
+    const editedTask = tasks[index];
+    setTask({ ...editedTask });
+    setEditingIndex(index);
+  };
+
+  const cancelEdit = () => {
+    setTask({ name: '', description: '' });
+    setEditingIndex(null);
   };
 
   const deleteTask = (index) => {
@@ -26,7 +39,7 @@ function App() {
     <div style={styles.container}>
       <h1 style={styles.heading}>Task Management App</h1>
       <div style={styles.formContainer}>
-        <h2>Add Task</h2>
+        <h2>{editingIndex === null ? 'Add Task' : 'Edit Task'}</h2>
         <form>
           <input
             type="text"
@@ -42,7 +55,14 @@ function App() {
             onChange={(e) => setTask({ ...task, description: e.target.value })}
             style={styles.input}
           />
-          <button type="button" onClick={addTask} style={styles.button}>Add Task</button>
+          <button type="button" onClick={addTask} style={styles.button}>
+            {editingIndex === null ? 'Add Task' : 'Update Task'}
+          </button>
+          {editingIndex !== null && (
+            <button type="button" onClick={cancelEdit} style={styles.button}>
+              Cancel
+            </button>
+          )}
         </form>
       </div>
       <div>
@@ -50,9 +70,43 @@ function App() {
         <ul style={styles.taskList}>
           {tasks.map((task, index) => (
             <li key={index} style={styles.listItem}>
-              {task.name} - {task.description}
-              <button onClick={() => editTask(index, task)} style={styles.editButton}>Edit</button>
-              <button onClick={() => deleteTask(index)} style={styles.deleteButton}>Delete</button>
+              {index === editingIndex ? (
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Task Name"
+                    value={task.name}
+                    onChange={(e) =>
+                      setTask({ ...task, name: e.target.value })
+                    }
+                    style={styles.input}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Task Description"
+                    value={task.description}
+                    onChange={(e) =>
+                      setTask({ ...task, description: e.target.value })
+                    }
+                    style={styles.input}
+                  />
+                </div>
+              ) : (
+                <div>
+                  {task.name} - {task.description}
+                </div>
+              )}
+              <button
+                onClick={() => (index === editingIndex ? addTask() : editTask(index))}
+                style={index === editingIndex ? styles.button : styles.editButton}
+              >
+                {index === editingIndex ? 'Save' : 'Edit'}
+              </button>
+              {index !== editingIndex && (
+                <button onClick={() => deleteTask(index)} style={styles.deleteButton}>
+                  Delete
+                </button>
+              )}
             </li>
           ))}
         </ul>
