@@ -1,79 +1,126 @@
 import React, { useState } from 'react';
-//import './TaskList.css';
 
-function TaskList() {
-    const [tasks, setTasks] = useState([]);
-    const [newTask, setNewTask] = useState('');
-    const [editedTask, setEditedTask] = useState(null);
-    const [editedText, setEditedText] = useState('');
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [task, setTask] = useState({ name: '', description: '' });
 
-    const addTask = () => {
-        if (newTask.trim() !== '') {
-            setTasks([...tasks, { id: Date.now(), text: newTask }]);
-            setNewTask('');
-        }
-    };
+  const addTask = () => {
+    if (task.name.trim() === '') return; // Input validation
+    setTasks([...tasks, task]);
+    setTask({ name: '', description: '' });
+  };
 
-    const editTask = (id) => {
-        const taskToEdit = tasks.find((task) => task.id === id);
-        if (taskToEdit) {
-            setEditedTask(id);
-            setEditedText(taskToEdit.text);
-        }
-    };
+  const editTask = (index, updatedTask) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index] = updatedTask;
+    setTasks(updatedTasks);
+  };
 
-    const saveTask = (id) => {
-        const updatedTasks = tasks.map((task) =>
-            task.id === id ? { ...task, text: editedText } : task
-        );
-        setTasks(updatedTasks);
-        setEditedTask(null);
-    };
+  const deleteTask = (index) => {
+    const updatedTasks = [...tasks];
+    updatedTasks.splice(index, 1);
+    setTasks(updatedTasks);
+  };
 
-    const deleteTask = (id) => {
-        const updatedTasks = tasks.filter((task) => task.id !== id);
-        setTasks(updatedTasks);
-    };
-
-    return (
-        <div className="task-list">
-            <h1>Task List</h1>
-            <div>
-                <input
-                    className='input-task'
-                    type="text"
-                    placeholder="Add a new task"
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                />
-                <button className="btnadd" onClick={addTask}>Add</button>
-            </div>
-
-                <ul>
-                    {tasks.map((task) => (
-                        <li key={task.id}>
-                            {editedTask === task.id ? (
-                                <div>
-                                    <input
-                                        className='input-edit'
-                                        type="text"
-                                        value={editedText}
-                                        onChange={(e) => setEditedText(e.target.value)}
-                                    />
-                                    <button className='btn-save' onClick={() => saveTask(task.id)}>Save</button>
-                                </div>
-                            ) : (
-                                <div className='ul-list'> 
-                                    {task.text}
-                                    <button className="btn-edit" onClick={() => editTask(task.id)}>Edit</button>
-                                    <button className="btn-delete" onClick={() => deleteTask(task.id)}>Delete</button>
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-    );
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.heading}>Task Management App</h1>
+      <div style={styles.formContainer}>
+        <h2>Add Task</h2>
+        <form>
+          <input
+            type="text"
+            placeholder="Task Name"
+            value={task.name}
+            onChange={(e) => setTask({ ...task, name: e.target.value })}
+            style={styles.input}
+          />
+          <input
+            type="text"
+            placeholder="Task Description"
+            value={task.description}
+            onChange={(e) => setTask({ ...task, description: e.target.value })}
+            style={styles.input}
+          />
+          <button type="button" onClick={addTask} style={styles.button}>Add Task</button>
+        </form>
+      </div>
+      <div>
+        <h2 style={styles.listHeader}>Task List</h2>
+        <ul style={styles.taskList}>
+          {tasks.map((task, index) => (
+            <li key={index} style={styles.listItem}>
+              {task.name} - {task.description}
+              <button onClick={() => editTask(index, task)} style={styles.editButton}>Edit</button>
+              <button onClick={() => deleteTask(index)} style={styles.deleteButton}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
-export default TaskList;
+const styles = {
+  container: {
+    fontFamily: 'Arial, sans-serif',
+    textAlign: 'center',
+    padding: '20px',
+  },
+  heading: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    margin: '10px 0',
+  },
+  formContainer: {
+    background: '#f0f0f0',
+    padding: '10px',
+    borderRadius: '5px',
+  },
+  input: {
+    width: '100%',
+    padding: '5px',
+    margin: '5px 0',
+  },
+  button: {
+    background: '#007bff',
+    color: '#fff',
+    border: 'none',
+    padding: '5px 10px',
+    cursor: 'pointer',
+  },
+  listHeader: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    marginTop: '20px',
+  },
+  taskList: {
+    listStyle: 'none',
+    padding: 0,
+  },
+  listItem: {
+    background: '#f9f9f9',
+    borderRadius: '5px',
+    padding: '10px',
+    margin: '10px 0',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editButton: {
+    background: '#ffc107',
+    color: '#333',
+    border: 'none',
+    padding: '5px 10px',
+    cursor: 'pointer',
+  },
+  deleteButton: {
+    background: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    padding: '5px 10px',
+    cursor: 'pointer',
+  },
+};
+
+export default App;
